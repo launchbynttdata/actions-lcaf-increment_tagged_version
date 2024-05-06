@@ -1,0 +1,19 @@
+name: Increment Tagged Version
+description: Creates a new tag with the next version.
+runs:
+  using: "composite"
+  steps:
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: 3.11
+
+    - name: Setup Launch-CLI
+      shell: bash
+      run: |
+        python3 -m pip install launch-cli
+
+    - name: Increment Tagged Version
+      shell: bash
+      run: |
+        launch github version apply --source-branch $GITHUB_HEAD_REF
