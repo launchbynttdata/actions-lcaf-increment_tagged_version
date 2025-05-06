@@ -29,7 +29,7 @@ runs:
       id: predict-next-version
       shell: bash
       run: |
-        echo "next-version=$(launch github version predict --source-branch $GITHUB_HEAD_REF)" >> $GITHUB_OUTPUT
+        echo "next-version=$(launch github version predict --source-branch ${GITHUB_HEAD_REF:-$GITHUB_REF})" >> $GITHUB_OUTPUT
 
     - name: Increment Tagged Version
       shell: bash
