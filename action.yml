@@ -1,5 +1,17 @@
 name: Increment Tagged Version
 description: Creates a new tag with the next version.
+inputs:
+  predict-only:
+    description: 'Do not actually increment tagged version, only predict next'
+    required: false
+    default: 'false'
+    options:
+      - true
+      - false
+outputs:
+  next-version:
+    description: "Next predicted semantic version"
+    value: ${{ steps.predict-next-version.outputs.next-version}}
 runs:
   using: "composite"
   steps:
@@ -13,7 +25,14 @@ runs:
       run: |
         python3 -m pip install launch-cli
 
+    - name: Predict Next Version
+      id: predict-next-version
+      shell: bash
+      run: |
+        echo "next-version=$(launch github version predict --source-branch $GITHUB_HEAD_REF)" >> $GITHUB_OUTPUT
+
     - name: Increment Tagged Version
       shell: bash
+      if: ${{ inputs.predict-only == 'false' }}
       run: |
         launch github version apply --source-branch $GITHUB_HEAD_REF
