@@ -8,6 +8,10 @@ inputs:
     options:
       - true
       - false
+  source-branch:
+    description: 'Source branch'
+    required: false
+    default: ''
 outputs:
   next-version:
     description: "Next predicted semantic version"
@@ -29,11 +33,14 @@ runs:
       id: predict-next-version
       shell: bash
       run: |
-        GH_REF=$(echo $GITHUB_REF | sed -e 's,refs/heads/,,')
-        echo "next-version=$(launch github version predict --source-branch ${GITHUB_HEAD_REF:-$GH_REF})" >> $GITHUB_OUTPUT
+        source_branch=${{ inputs.source-branch }}
+        if [ -z "$source_branch" ]; then
+          source_branch=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}
+        fi
+        echo "next-version=$(launch github version predict --source-branch $source_branch)" >> $GITHUB_OUTPUT
 
     - name: Increment Tagged Version
       shell: bash
       if: ${{ inputs.predict-only == 'false' }}
       run: |
-        launch github version apply --source-branch $GITHUB_HEAD_REF
+        launch github version apply --source-branch ${{ steps.predict-next-version.outputs.next-version }}
